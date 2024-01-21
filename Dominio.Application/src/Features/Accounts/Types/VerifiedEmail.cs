@@ -6,6 +6,7 @@ public class VerifiedEmail
 {
     public string Address { get; private set; }
 
+    public static implicit operator VerifiedEmail(string email) => new(CheckVerifiedEmail(email));
     public static implicit operator VerifiedEmail(Email email) => new(CheckVerifiedEmail(email));
 
     private VerifiedEmail(string email)

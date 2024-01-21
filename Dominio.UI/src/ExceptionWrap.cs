@@ -52,6 +52,30 @@ public class ExceptionWrapping<T>
     public bool IsSuccess
     => Status is ResultStatus.Success;
 
+    public bool TryError(out Exception e)
+    {
+        if (IsSuccess)
+        {
+            e = new();
+            return false;
+        }
+
+        e = Error!;
+        return true;
+    }
+
+    public bool TrySuccess(out T data)
+    {
+        if (IsError)
+        {
+            data = default(T)!;
+            return false;
+        }
+
+        data = Data!;
+        return true;
+    }
+
     public void ThrowException()
     {
         if (IsSuccess) return;

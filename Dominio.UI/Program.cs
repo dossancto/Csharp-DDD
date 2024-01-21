@@ -16,27 +16,42 @@ void HandleEmailError(EmailException e)
     Console.WriteLine(msg);
 }
 
-void EmailAdd()
+object EmailAdd(Account user)
 {
-    var user = new Account
-    {
-        Email = new("teste@teste.com")
-        {
-            Status = EmailStatus.UNVERIFIED
-        }
-    };
-
-    var changePassword = new ChangePassword(user.Email, "a", "b");
+    var changePassword = new ChangePassword(user.Email, "my old and weak password", "my new strong password");
     var newPassword = new ChangeAccountPasswordUseCase().Execute(changePassword);
 
     Console.WriteLine($"Your password was updated. the new one is '{newPassword}'");
+    return new();
 }
 
-try
+object SendConfirmation(Account user)
 {
-    EmailAdd();
+    Console.WriteLine(new SendEmailConfirmationUseCase().Execute(user.Email));
+    return new();
 }
-catch (EmailException e)
+
+var user = new Account
 {
-    HandleEmailError(e);
-}
+    Username = "lu-css",
+    Email = new("teste@teste.com")
+    {
+        Status = EmailStatus.UNVERIFIED
+    }
+};
+
+List<Func<object>> funcs = [
+  () => EmailAdd(user),
+  () => SendConfirmation(user),
+];
+
+funcs.ForEach(func =>
+{
+    if (ExceptionWrap.Wrap(func).TryError(out Exception e))
+    {
+        Console.WriteLine(e.Message);
+        Console.WriteLine(Environment.NewLine);
+    }
+});
+
+Console.WriteLine(new SendAccountMessageUseCase().Execute(new("lu css", "azeite", "Vacilao")));
